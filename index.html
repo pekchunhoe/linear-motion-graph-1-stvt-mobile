@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+    <title>Position-Time Motion Simulation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Position-Time Motion Simulation</h2>
+    <!-- =====================================================
+         CONTROL BUTTONS
+         ===================================================== -->
+    <div class="controls">
+        <button id="playBtn">
+            PLAY
+        </button>
+        <button id="stopBtn">
+            STOP
+        </button>
+        <button id="resetBtn">
+            RESET
+        </button>
+    </div>
+    <!-- =====================================================
+         MAIN SIMULATION CONTAINER
+         ===================================================== -->
+    <div class="container">
+        <!-- =================================================
+             POSITION-TIME GRAPH
+             ================================================= -->
+        <div class="graphPanel">
+            <h3>
+                Position-Time Graph
+            </h3>
+            <canvas
+                id="positionCanvas"
+                aria-label="Position-Time Graph">
+            </canvas>
+        </div>
+        <!-- =================================================
+             MOVING CAR SIMULATION
+             ================================================= -->
+        <div class="carPanel">
+            <h3>
+                Moving Car Simulation
+            </h3>
+            <div class="road">
+                <!-- -----------------------------------------
+                     POSITION MARKERS
+                     ----------------------------------------- -->
+                <div class="mark minus100">
+                    -100m
+                </div>
+                <div class="mark origin">
+                    Origin
+                </div>
+                <div class="mark plus50">
+                    50m
+                </div>
+                <div class="mark plus100">
+                    100m
+                </div>
+                <!-- -----------------------------------------
+                     MOVING CAR
+                     ----------------------------------------- -->
+                <div id="carContainer">
+                    <svg
+                        id="carSVG"
+                        width="80"
+                        height="40"
+                        viewBox="0 0 300 150"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-label="Moving car"
+                    >
+                        <!-- Car body -->
+                        <rect
+                            x="50"
+                            y="60"
+                            width="200"
+                            height="50"
+                            rx="20"
+                            fill="red"
+                        />
+                        <!-- Roof -->
+                        <rect
+                            x="90"
+                            y="30"
+                            width="120"
+                            height="40"
+                            rx="20"
+                            fill="red"
+                        />
+                        <!-- Windows -->
+                        <rect
+                            x="100"
+                            y="35"
+                            width="40"
+                            height="30"
+                            rx="10"
+                            fill="lightblue"
+                        />
+                        <rect
+                            x="150"
+                            y="35"
+                            width="50"
+                            height="30"
+                            rx="10"
+                            fill="lightblue"
+                        />
+                        <!-- Wheels -->
+                        <circle
+                            cx="100"
+                            cy="120"
+                            r="15"
+                            fill="black"
+                        />
+                        <circle
+                            cx="200"
+                            cy="120"
+                            r="15"
+                            fill="black"
+                        />
+                        <!-- Rims -->
+                        <circle
+                            cx="100"
+                            cy="120"
+                            r="7"
+                            fill="gray"
+                        />
+                        <circle
+                            cx="200"
+                            cy="120"
+                            r="7"
+                            fill="gray"
+                        />
+                        <!-- Headlight -->
+                        <circle
+                            cx="250"
+                            cy="85"
+                            r="5"
+                            fill="yellow"
+                        />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <!-- =================================================
+             VELOCITY-TIME GRAPH
+             ================================================= -->
+        <div class="graphPanel">
+            <h3>
+                Velocity-Time Graph
+            </h3>
+            <canvas
+                id="velocityCanvas"
+                aria-label="Velocity-Time Graph">
+            </canvas>
+        </div>
+    </div>
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+This version is ready to work with the responsive CSS + responsive JavaScript we just prepared.
