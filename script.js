@@ -1,787 +1,1129 @@
 /* =========================================================
    POSITION-TIME MOTION SIMULATION
-   FINAL RESPONSIVE + ACCESSIBLE VERSION
-   Physics:
-   Position s(t)
-   Velocity v(t)
-   Total simulation time = 30 s
+   FINAL FIXED VERSION
+
    Responsive:
    - Mobile phone
-   - Small phone
    - iPad / tablet
    - Laptop / desktop
-   Interaction:
-   - Touch
-   - Mouse
-   - Stylus
-   - Pointer Events
-   - Keyboard focus
+
+   Controls:
+   - PLAY
+   - STOP
+   - RESET
+   - Touch / mouse dragging
+   - Keyboard control
    ========================================================= */
+
+
 /* =========================================================
-   CANVAS ELEMENTS
+   GET HTML ELEMENTS
    ========================================================= */
+
 const posCanvas = document.getElementById("positionCanvas");
 const velCanvas = document.getElementById("velocityCanvas");
+
 const pctx = posCanvas.getContext("2d");
 const vctx = velCanvas.getContext("2d");
+
+const playBtn = document.getElementById("playBtn");
+const stopBtn = document.getElementById("stopBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const carContainer = document.getElementById("carContainer");
+const carSVG = document.getElementById("carSVG");
+const road = document.querySelector(".road");
+
+
 /* =========================================================
    SIMULATION VARIABLES
    ========================================================= */
+
 let playing = false;
+
 let currentT = 0;
+
 let animationId = null;
+
 const totalTime = 30;
+
+
 /* =========================================================
-   RESPONSIVE GRAPH SETTINGS
+   RESPONSIVE SETTINGS
    ========================================================= */
+
 function getGraphMargin(canvas) {
-    if (canvas.clientWidth <= 360) {
+
+    const width = canvas.getBoundingClientRect().width;
+
+    if (width <= 360) {
         return 38;
     }
-    if (canvas.clientWidth <= 480) {
+
+    if (width <= 480) {
         return 45;
     }
+
     return 60;
 }
+
+
 function getVerticalMargin(canvas) {
-    if (canvas.clientWidth <= 480) {
+
+    const width = canvas.getBoundingClientRect().width;
+
+    if (width <= 480) {
         return 25;
     }
+
     return 40;
 }
+
+
 function getFontSize(canvas) {
-    if (canvas.clientWidth <= 360) {
+
+    const width = canvas.getBoundingClientRect().width;
+
+    if (width <= 360) {
         return 9;
     }
-    if (canvas.clientWidth <= 480) {
+
+    if (width <= 480) {
         return 10;
     }
-    if (canvas.clientWidth <= 768) {
+
+    if (width <= 768) {
         return 12;
     }
+
     return 14;
 }
+
+
 function getParticleSize(canvas) {
-    if (canvas.clientWidth <= 360) {
+
+    const width = canvas.getBoundingClientRect().width;
+
+    if (width <= 360) {
         return 5;
     }
-    if (canvas.clientWidth <= 480) {
+
+    if (width <= 480) {
         return 6;
     }
-    if (canvas.clientWidth <= 768) {
+
+    if (width <= 768) {
         return 7;
     }
+
     return 8;
 }
+
+
 /* =========================================================
-   HIGH-DPI CANVAS SETUP
+   CANVAS RESIZE
    ========================================================= */
-function setupCanvas(canvas, ctx) {
-    const rect = canvas.getBoundingClientRect();
-    const cssWidth = Math.max(1, rect.width);
-    const cssHeight = Math.max(1, rect.height);
-    const dpr = Math.min(
-        window.devicePixelRatio || 1,
-        2
-    );
-    /*
-       Physical canvas resolution.
-    */
-    canvas.width = Math.round(
-        cssWidth * dpr
-    );
-    canvas.height = Math.round(
-        cssHeight * dpr
-    );
-    /*
-       Draw using CSS-pixel coordinates.
-    */
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
-}
-/* =========================================================
-   RESIZE CANVAS
-   ========================================================= */
+
 function resizeCanvas() {
-    setupCanvas(posCanvas, pctx);
-    setupCanvas(velCanvas, vctx);
+
+    const posRect =
+        posCanvas.getBoundingClientRect();
+
+    const velRect =
+        velCanvas.getBoundingClientRect();
+
+
+    /*
+       Use the actual CSS display size.
+
+       Device pixel ratio is deliberately kept simple
+       to avoid drawing/scaling conflicts.
+    */
+
+    posCanvas.width =
+        Math.max(1, Math.round(posRect.width));
+
+    posCanvas.height =
+        Math.max(1, Math.round(posRect.height));
+
+
+    velCanvas.width =
+        Math.max(1, Math.round(velRect.width));
+
+    velCanvas.height =
+        Math.max(1, Math.round(velRect.height));
+
+
+    /*
+       Reset canvas transformations.
+    */
+
+    pctx.setTransform(
+        1, 0, 0, 1, 0, 0
+    );
+
+    vctx.setTransform(
+        1, 0, 0, 1, 0, 0
+    );
+
+
     drawAll();
 }
+
+
 window.addEventListener(
     "resize",
     resizeCanvas
 );
+
+
 /* =========================================================
    POSITION FUNCTION
    ========================================================= */
+
 function s(t) {
+
     if (t <= 5) {
+
         return 2 * t * t;
     }
+
     if (t <= 10) {
+
         return 100 -
-               2 * Math.pow(10 - t, 2);
+            2 * Math.pow(10 - t, 2);
     }
+
     if (t <= 15) {
+
         return 100;
     }
+
     if (t <= 25) {
+
         return 100 -
-               20 * (t - 15);
+            20 * (t - 15);
     }
+
     return -100 +
-           20 * (t - 25);
+        20 * (t - 25);
 }
+
+
 /* =========================================================
    VELOCITY FUNCTION
    ========================================================= */
+
 function v(t) {
+
     if (t <= 5) {
+
         return 4 * t;
     }
+
     if (t <= 10) {
+
         return 4 * (10 - t);
     }
+
     if (t <= 15) {
+
         return 0;
     }
+
     if (t <= 25) {
+
         return -20;
     }
+
     return 20;
 }
+
+
 /* =========================================================
-   X-AXIS MAPPING
+   X MAPPING
    ========================================================= */
+
 function mapX(t, canvas) {
+
+    const width =
+        canvas.getBoundingClientRect().width;
+
     const margin =
         getGraphMargin(canvas);
+
     const rightMargin = 20;
+
     const usableWidth =
-        canvas.clientWidth -
+        width -
         margin -
         rightMargin;
+
+
     return margin +
-           (t / totalTime) *
-           usableWidth;
+        (t / totalTime) *
+        usableWidth;
 }
+
+
 /* =========================================================
    POSITION Y MAPPING
    ========================================================= */
+
 function mapYpos(value) {
-    const h =
-        posCanvas.clientHeight;
+
+    const height =
+        posCanvas.getBoundingClientRect().height;
+
     const margin =
         getVerticalMargin(posCanvas);
+
     const usableHeight =
-        h - 2 * margin;
-    return h -
-           margin -
-           ((value + 120) / 240) *
-           usableHeight;
+        height -
+        2 * margin;
+
+
+    return height -
+        margin -
+        ((value + 120) / 240) *
+        usableHeight;
 }
+
+
 /* =========================================================
    VELOCITY Y MAPPING
    ========================================================= */
+
 function mapYvel(value) {
-    const h =
-        velCanvas.clientHeight;
+
+    const height =
+        velCanvas.getBoundingClientRect().height;
+
     const margin =
         getVerticalMargin(velCanvas);
+
     const usableHeight =
-        h - 2 * margin;
-    return h -
-           margin -
-           ((value + 25) / 50) *
-           usableHeight;
+        height -
+        2 * margin;
+
+
+    return height -
+        margin -
+        ((value + 25) / 50) *
+        usableHeight;
 }
+
+
 /* =========================================================
    POSITION-TIME GRAPH
    ========================================================= */
+
 function drawPositionGraph() {
-    const w =
-        posCanvas.clientWidth;
-    const h =
-        posCanvas.clientHeight;
+
+    const width =
+        posCanvas.getBoundingClientRect().width;
+
+    const height =
+        posCanvas.getBoundingClientRect().height;
+
+
     pctx.clearRect(
         0,
         0,
-        w,
-        h
+        width,
+        height
     );
+
+
     const margin =
         getGraphMargin(posCanvas);
+
     const verticalMargin =
         getVerticalMargin(posCanvas);
+
     const fontSize =
         getFontSize(posCanvas);
+
     const particleSize =
         getParticleSize(posCanvas);
+
+
     /* -----------------------------------------
-       Axis locations
+       Axis positions
        ----------------------------------------- */
+
     const xAxisY =
         mapYpos(0);
+
     const yAxisX =
         margin;
+
+
     /* -----------------------------------------
-       Font
+       Text
        ----------------------------------------- */
+
     pctx.font =
-        `${fontSize}px Arial, Helvetica, sans-serif`;
+        `${fontSize}px Arial`;
+
+    pctx.fillStyle =
+        "black";
+
     pctx.textBaseline =
         "alphabetic";
+
+
     /* -----------------------------------------
        Axes
        ----------------------------------------- */
+
     pctx.strokeStyle =
         "black";
+
     pctx.lineWidth =
         2;
+
     pctx.beginPath();
+
     pctx.moveTo(
         yAxisX,
         xAxisY
     );
+
     pctx.lineTo(
-        w - 20,
+        width - 20,
         xAxisY
     );
+
     pctx.moveTo(
         yAxisX,
         verticalMargin
     );
+
     pctx.lineTo(
         yAxisX,
-        h - verticalMargin
+        height - verticalMargin
     );
+
     pctx.stroke();
+
+
     /* -----------------------------------------
        Axis labels
        ----------------------------------------- */
-    pctx.fillStyle =
-        "black";
+
     pctx.fillText(
         "t (s)",
-        Math.max(
-            yAxisX + 5,
-            w - 42
-        ),
+        width - 42,
         xAxisY - 8
     );
+
     pctx.fillText(
         "s (m)",
         5,
         verticalMargin - 5
     );
+
+
     /* -----------------------------------------
        Position labels
        ----------------------------------------- */
+
     pctx.fillText(
         "100",
-        Math.max(
-            3,
-            margin - 38
-        ),
+        Math.max(3, margin - 38),
         mapYpos(100) + 4
     );
+
     pctx.fillText(
         "50",
-        Math.max(
-            5,
-            margin - 30
-        ),
+        Math.max(5, margin - 30),
         mapYpos(50) + 4
     );
+
     pctx.fillText(
         "0",
-        Math.max(
-            8,
-            margin - 25
-        ),
+        Math.max(8, margin - 25),
         mapYpos(0) + 4
     );
+
     pctx.fillText(
         "-100",
-        Math.max(
-            1,
-            margin - 40
-        ),
+        Math.max(1, margin - 40),
         mapYpos(-100) + 4
     );
+
+
     /* -----------------------------------------
        Position curve
        ----------------------------------------- */
+
     pctx.strokeStyle =
         "blue";
+
     pctx.lineWidth =
         3;
+
     pctx.beginPath();
+
+
     for (
         let t = 0;
         t <= totalTime;
         t += 0.05
     ) {
+
         const x =
             mapX(t, posCanvas);
+
         const y =
             mapYpos(s(t));
+
+
         if (t === 0) {
+
             pctx.moveTo(
                 x,
                 y
             );
+
         } else {
+
             pctx.lineTo(
                 x,
                 y
             );
         }
     }
+
+
     pctx.stroke();
+
+
     /* -----------------------------------------
-       Moving point
+       Moving red point
        ----------------------------------------- */
-    const x =
+
+    const pointX =
         mapX(
             currentT,
             posCanvas
         );
-    const y =
+
+    const pointY =
         mapYpos(
             s(currentT)
         );
+
+
     pctx.fillStyle =
         "red";
+
     pctx.beginPath();
+
     pctx.arc(
-        x,
-        y,
+        pointX,
+        pointY,
         particleSize,
         0,
         Math.PI * 2
     );
+
     pctx.fill();
+
+
     /* -----------------------------------------
        Tangent line
        ----------------------------------------- */
-    const deltaT =
-        0.1;
+
+    const deltaT = 0.1;
+
+
     const t1 =
         Math.max(
             0,
             currentT - deltaT
         );
+
     const t2 =
         Math.min(
             totalTime,
             currentT + deltaT
         );
+
+
     const x1 =
         mapX(
             t1,
             posCanvas
         );
+
     const y1 =
         mapYpos(
             s(t1)
         );
+
+
     const x2 =
         mapX(
             t2,
             posCanvas
         );
+
     const y2 =
         mapYpos(
             s(t2)
         );
+
+
     const dx =
         x2 - x1;
+
     const dy =
         y2 - y1;
+
+
     const length =
         Math.sqrt(
             dx * dx +
             dy * dy
         );
+
+
     if (length > 0) {
+
         const unitX =
             dx / length;
+
         const unitY =
             dy / length;
-        let extend = 150;
-        if (w <= 480) {
-            extend = 80;
+
+
+        let extension = 150;
+
+
+        if (width <= 480) {
+            extension = 80;
         }
-        if (w <= 360) {
-            extend = 60;
+
+        if (width <= 360) {
+            extension = 60;
         }
+
+
         const startX =
-            x - unitX * extend;
+            pointX -
+            unitX * extension;
+
         const startY =
-            y - unitY * extend;
+            pointY -
+            unitY * extension;
+
+
         const endX =
-            x + unitX * extend;
+            pointX +
+            unitX * extension;
+
         const endY =
-            y + unitY * extend;
+            pointY +
+            unitY * extension;
+
+
         pctx.setLineDash([
             6,
             6
         ]);
+
         pctx.strokeStyle =
             "red";
+
         pctx.lineWidth =
             2;
+
         pctx.beginPath();
+
         pctx.moveTo(
             startX,
             startY
         );
+
         pctx.lineTo(
             endX,
             endY
         );
+
         pctx.stroke();
+
         pctx.setLineDash([]);
     }
 }
+
+
 /* =========================================================
    VELOCITY-TIME GRAPH
    ========================================================= */
+
 function drawVelocityGraph() {
-    const w =
-        velCanvas.clientWidth;
-    const h =
-        velCanvas.clientHeight;
+
+    const width =
+        velCanvas.getBoundingClientRect().width;
+
+    const height =
+        velCanvas.getBoundingClientRect().height;
+
+
     vctx.clearRect(
         0,
         0,
-        w,
-        h
+        width,
+        height
     );
+
+
     const margin =
         getGraphMargin(velCanvas);
+
     const verticalMargin =
         getVerticalMargin(velCanvas);
+
     const fontSize =
         getFontSize(velCanvas);
+
     const particleSize =
         getParticleSize(velCanvas);
+
+
     /* -----------------------------------------
-       Axis locations
+       Axis positions
        ----------------------------------------- */
+
     const xAxisY =
         mapYvel(0);
+
     const yAxisX =
         margin;
+
+
     /* -----------------------------------------
-       Font
+       Text
        ----------------------------------------- */
+
     vctx.font =
-        `${fontSize}px Arial, Helvetica, sans-serif`;
+        `${fontSize}px Arial`;
+
+    vctx.fillStyle =
+        "black";
+
     vctx.textBaseline =
         "alphabetic";
+
+
     /* -----------------------------------------
        Axes
        ----------------------------------------- */
+
     vctx.strokeStyle =
         "black";
+
     vctx.lineWidth =
         2;
+
     vctx.beginPath();
+
     vctx.moveTo(
         yAxisX,
         xAxisY
     );
+
     vctx.lineTo(
-        w - 20,
+        width - 20,
         xAxisY
     );
+
     vctx.moveTo(
         yAxisX,
         verticalMargin
     );
+
     vctx.lineTo(
         yAxisX,
-        h - verticalMargin
+        height - verticalMargin
     );
+
     vctx.stroke();
+
+
     /* -----------------------------------------
        Axis labels
        ----------------------------------------- */
-    vctx.fillStyle =
-        "black";
+
     vctx.fillText(
         "t (s)",
-        Math.max(
-            yAxisX + 5,
-            w - 42
-        ),
+        width - 42,
         xAxisY - 8
     );
+
     vctx.fillText(
         "v (m/s)",
         5,
         verticalMargin - 5
     );
+
+
     /* -----------------------------------------
        Velocity labels
        ----------------------------------------- */
+
     vctx.fillText(
         "20",
-        Math.max(
-            3,
-            margin - 35
-        ),
+        Math.max(3, margin - 35),
         mapYvel(20) + 4
     );
+
     vctx.fillText(
         "0",
-        Math.max(
-            8,
-            margin - 25
-        ),
+        Math.max(8, margin - 25),
         mapYvel(0) + 4
     );
+
     vctx.fillText(
         "-20",
-        Math.max(
-            1,
-            margin - 40
-        ),
+        Math.max(1, margin - 40),
         mapYvel(-20) + 4
     );
+
+
     /* -----------------------------------------
        Velocity curve
        ----------------------------------------- */
+
     vctx.strokeStyle =
         "green";
+
     vctx.lineWidth =
         3;
+
     vctx.beginPath();
+
+
     for (
         let t = 0;
         t <= totalTime;
         t += 0.05
     ) {
+
         const x =
             mapX(
                 t,
                 velCanvas
             );
+
         const y =
             mapYvel(
                 v(t)
             );
+
+
         if (t === 0) {
+
             vctx.moveTo(
                 x,
                 y
             );
+
         } else {
+
             vctx.lineTo(
                 x,
                 y
             );
         }
     }
+
+
     vctx.stroke();
+
+
     /* -----------------------------------------
-       Moving point
+       Moving red point
        ----------------------------------------- */
-    const x =
+
+    const pointX =
         mapX(
             currentT,
             velCanvas
         );
-    const y =
+
+    const pointY =
         mapYvel(
             v(currentT)
         );
+
+
     vctx.fillStyle =
         "red";
+
     vctx.beginPath();
+
     vctx.arc(
-        x,
-        y,
+        pointX,
+        pointY,
         particleSize,
         0,
         Math.PI * 2
     );
+
     vctx.fill();
 }
+
+
 /* =========================================================
-   CAR UPDATE
+   UPDATE CAR
    ========================================================= */
+
 function updateCar() {
-    const position =
-        s(currentT);
-    const road =
-        document.querySelector(".road");
-    const carContainer =
-        document.getElementById(
-            "carContainer"
-        );
-    const carSVG =
-        document.getElementById(
-            "carSVG"
-        );
-    if (
-        !road ||
-        !carContainer ||
-        !carSVG
-    ) {
+
+    if (!road || !carContainer || !carSVG) {
         return;
     }
-    const width =
-        road.clientWidth;
+
+
+    const position =
+        s(currentT);
+
+    const roadWidth =
+        road.getBoundingClientRect().width;
+
+
     /* -----------------------------------------
-       Responsive road margin
+       Responsive road margins
        ----------------------------------------- */
+
     let margin = 40;
-    if (width <= 480) {
+
+
+    if (roadWidth <= 480) {
         margin = 25;
     }
-    if (width <= 360) {
+
+    if (roadWidth <= 360) {
         margin = 20;
     }
+
+
     /* -----------------------------------------
-       Convert position → road coordinate
+       Position → road coordinate
        ----------------------------------------- */
+
     const x =
         margin +
         ((position + 100) / 200) *
-        (width - 2 * margin);
+        (roadWidth - 2 * margin);
+
+
     carContainer.style.left =
         `${x}px`;
+
+
     /* -----------------------------------------
-       Car direction
+       Direction
        ----------------------------------------- */
+
     const velocity =
         v(currentT);
+
+
     if (velocity < -0.1) {
+
         carSVG.style.transform =
             "scaleX(-1)";
+
     } else {
+
         carSVG.style.transform =
             "scaleX(1)";
     }
 }
+
+
 /* =========================================================
    DRAW EVERYTHING
    ========================================================= */
+
 function drawAll() {
+
     drawPositionGraph();
+
     drawVelocityGraph();
+
     updateCar();
 }
+
+
 /* =========================================================
-   ANIMATION
+   PLAY / ANIMATION
    ========================================================= */
+
 function animate() {
+
     if (!playing) {
         return;
     }
+
+
     currentT += 0.03;
+
+
     if (currentT >= totalTime) {
+
         currentT =
             totalTime;
+
         playing =
             false;
+
         animationId =
             null;
+
         drawAll();
+
         return;
     }
+
+
     drawAll();
+
+
     animationId =
         requestAnimationFrame(
             animate
         );
 }
+
+
 /* =========================================================
    PLAY BUTTON
    ========================================================= */
-document
-    .getElementById("playBtn")
-    .addEventListener(
-        "click",
-        () => {
-            if (!playing) {
-                playing = true;
-                animate();
-            }
+
+playBtn.addEventListener(
+    "click",
+    () => {
+
+        if (playing) {
+            return;
         }
-    );
+
+
+        /*
+           If simulation has reached the end,
+           start again from the beginning.
+        */
+
+        if (currentT >= totalTime) {
+            currentT = 0;
+        }
+
+
+        playing = true;
+
+        animate();
+    }
+);
+
+
 /* =========================================================
    STOP BUTTON
    ========================================================= */
-document
-    .getElementById("stopBtn")
-    .addEventListener(
-        "click",
-        () => {
-            playing = false;
-            if (animationId !== null) {
-                cancelAnimationFrame(
-                    animationId
-                );
-                animationId = null;
-            }
+
+stopBtn.addEventListener(
+    "click",
+    () => {
+
+        playing = false;
+
+
+        if (animationId !== null) {
+
+            cancelAnimationFrame(
+                animationId
+            );
+
+            animationId = null;
         }
-    );
+
+
+        drawAll();
+    }
+);
+
+
 /* =========================================================
    RESET BUTTON
    ========================================================= */
-document
-    .getElementById("resetBtn")
-    .addEventListener(
-        "click",
-        () => {
-            playing = false;
-            if (animationId !== null) {
-                cancelAnimationFrame(
-                    animationId
-                );
-                animationId = null;
-            }
-            currentT = 0;
-            drawAll();
+
+resetBtn.addEventListener(
+    "click",
+    () => {
+
+        playing = false;
+
+
+        if (animationId !== null) {
+
+            cancelAnimationFrame(
+                animationId
+            );
+
+            animationId = null;
         }
-    );
+
+
+        currentT = 0;
+
+
+        drawAll();
+    }
+);
+
+
 /* =========================================================
-   POINTER / TOUCH GRAPH CONTROL
+   TOUCH / MOUSE / STYLUS CONTROL
    ========================================================= */
+
 let dragging = false;
+
+
 /* -----------------------------------------
-   Convert pointer X → simulation time
+   Convert pointer position to time
    ----------------------------------------- */
-function updateTimeFromPointer(event) {
+
+function setTimeFromPointer(event) {
+
     const rect =
         posCanvas.getBoundingClientRect();
-    const clientX =
-        event.clientX;
+
+
     const x =
-        clientX -
+        event.clientX -
         rect.left;
+
+
     const margin =
-        getGraphMargin(
-            posCanvas
-        );
+        getGraphMargin(posCanvas);
+
+
     const usableWidth =
         rect.width -
         margin -
         20;
+
+
     let t =
         ((x - margin) /
         usableWidth) *
         totalTime;
+
+
     t =
         Math.max(
             0,
@@ -790,148 +1132,221 @@ function updateTimeFromPointer(event) {
                 t
             )
         );
-    currentT =
-        t;
+
+
+    currentT = t;
+
+
+    /*
+       Dragging manually pauses the animation.
+    */
+
+    if (dragging) {
+        playing = false;
+
+        if (animationId !== null) {
+
+            cancelAnimationFrame(
+                animationId
+            );
+
+            animationId = null;
+        }
+    }
+
+
     drawAll();
 }
+
+
 /* -----------------------------------------
    Pointer down
    ----------------------------------------- */
+
 posCanvas.addEventListener(
     "pointerdown",
     (event) => {
+
         dragging = true;
-        /*
-           Capture the pointer so that
-           dragging continues smoothly.
-        */
+
+
         try {
+
             posCanvas.setPointerCapture(
                 event.pointerId
             );
+
         } catch (error) {
             // Pointer capture unavailable.
         }
-        updateTimeFromPointer(event);
+
+
+        setTimeFromPointer(event);
     }
 );
+
+
 /* -----------------------------------------
    Pointer move
    ----------------------------------------- */
+
 posCanvas.addEventListener(
     "pointermove",
     (event) => {
+
         if (!dragging) {
             return;
         }
-        updateTimeFromPointer(event);
+
+
+        setTimeFromPointer(event);
     }
 );
+
+
 /* -----------------------------------------
    Pointer up
    ----------------------------------------- */
+
 posCanvas.addEventListener(
     "pointerup",
     (event) => {
+
         dragging = false;
+
+
         try {
+
             posCanvas.releasePointerCapture(
                 event.pointerId
             );
+
         } catch (error) {
-            // Pointer capture already released.
+            // Pointer already released.
         }
     }
 );
+
+
 /* -----------------------------------------
    Pointer cancel
    ----------------------------------------- */
+
 posCanvas.addEventListener(
     "pointercancel",
     () => {
+
         dragging = false;
     }
 );
-/* -----------------------------------------
-   Pointer leaves canvas
-   ----------------------------------------- */
-posCanvas.addEventListener(
-    "pointerleave",
-    (event) => {
-        /*
-           Do not immediately stop dragging.
-           Pointer capture keeps the interaction
-           alive while the user is dragging.
-        */
-        if (
-            event.pointerType === "mouse" &&
-            !posCanvas.hasPointerCapture(
-                event.pointerId
-            )
-        ) {
-            dragging = false;
-        }
-    }
-);
+
+
 /* =========================================================
-   KEYBOARD ACCESSIBILITY
+   KEYBOARD CONTROL
    ========================================================= */
-/*
-   The Position-Time graph can also be
-   controlled with the keyboard.
-   Arrow Left  → move backward
-   Arrow Right → move forward
-   Home        → t = 0
-   End         → t = 30 s
-*/
+
 posCanvas.addEventListener(
     "keydown",
     (event) => {
-        const step = 0.1;
-        let handled = true;
+
+        let changed = false;
+
+
         switch (event.key) {
+
             case "ArrowLeft":
+
                 currentT =
                     Math.max(
                         0,
-                        currentT - step
+                        currentT - 0.1
                     );
+
+                changed = true;
+
                 break;
+
+
             case "ArrowRight":
+
                 currentT =
                     Math.min(
                         totalTime,
-                        currentT + step
+                        currentT + 0.1
                     );
+
+                changed = true;
+
                 break;
+
+
             case "Home":
+
                 currentT = 0;
+
+                changed = true;
+
                 break;
+
+
             case "End":
+
                 currentT =
                     totalTime;
+
+                changed = true;
+
                 break;
-            default:
-                handled = false;
         }
-        if (handled) {
+
+
+        if (changed) {
+
             event.preventDefault();
+
+            playing = false;
+
+
+            if (animationId !== null) {
+
+                cancelAnimationFrame(
+                    animationId
+                );
+
+                animationId = null;
+            }
+
+
             drawAll();
         }
     }
 );
+
+
 /* =========================================================
-   CONTEXT MENU
+   PREVENT CONTEXT MENU ON GRAPH
    ========================================================= */
+
 posCanvas.addEventListener(
     "contextmenu",
     (event) => {
+
         event.preventDefault();
     }
 );
-/* =========================================================
-   INITIALIZE
-   ========================================================= */
-resizeCanvas();
 
-This is the version I recommend keeping as your master script.js. It is compatible with the latest index.html and style.css, including the focus/contrast accessibility additions.
+
+/* =========================================================
+   INITIALIZE SIMULATION
+   ========================================================= */
+
+/*
+   Wait until the page layout has been calculated
+   before determining canvas dimensions.
+*/
+
+window.requestAnimationFrame(
+    () => {
+        resizeCanvas();
+    }
+);
