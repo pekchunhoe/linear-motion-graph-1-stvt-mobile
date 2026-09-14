@@ -1,511 +1,76 @@
-/* =========================================================
-   POSITION-TIME MOTION SIMULATION
-   RESPONSIVE CSS
-   Mobile Phone  → Compact Portrait
-   Tablet / iPad → Larger Display
-   Laptop/Desktop → Full Display
-   ========================================================= */
-/* =========================================================
-   GLOBAL
-   ========================================================= */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-}
-body {
-    padding: 15px;
-    background: #f5f5f5;
-    overflow-x: hidden;
-}
-/* =========================================================
-   HEADINGS
-   ========================================================= */
-h2 {
-    text-align: center;
-    font-size: 24px;
-    line-height: 1.2;
-    margin-bottom: 12px;
-}
-h3 {
-    text-align: center;
-    font-size: 18px;
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-/* =========================================================
-   MAIN CONTAINER
-   ========================================================= */
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-/* =========================================================
-   PANELS
-   ========================================================= */
-.graphPanel,
-.carPanel {
-    width: 100%;
-    margin: 16px auto;
-    padding: 10px;
-    background: white;
-    border-radius: 10px;
-    box-shadow:
-        0 2px 5px rgba(0, 0, 0, 0.2);
-}
-/* =========================================================
-   CANVAS
-   ========================================================= */
-canvas {
-    display: block;
-    width: 100%;
-    height: 300px;
-    border: 1px solid #ccc;
-    /*
-       Allows JavaScript to handle
-       touch / pointer interaction.
-    */
-    touch-action: none;
-}
-/* =========================================================
-   CONTROL BUTTONS
-   ========================================================= */
-.controls {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-}
-button {
-    min-width: 90px;
-    min-height: 42px;
-    padding: 9px 18px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border: 1px solid #aaa;
-    border-radius: 7px;
-    background: #ffffff;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-}
-button:active {
-    transform: scale(0.97);
-}
-/* =========================================================
-   ROAD / CAR SIMULATION
-   ========================================================= */
-.road {
-    position: relative;
-    width: 100%;
-    height: 150px;
-    background: #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-}
-/* Road centre/reference line */
-.road::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 75px;
-    width: 100%;
-    height: 5px;
-    background: black;
-    pointer-events: none;
-}
-/* =========================================================
-   CAR CONTAINER
-   ========================================================= */
-#carContainer {
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: none;
-}
-/* =========================================================
-   CAR SVG
-   ========================================================= */
-#carSVG {
-    display: block;
-    width: 80px;
-    height: auto;
-    transform-origin: center center;
-    transition:
-        transform 0.1s linear;
-    user-select: none;
-    -webkit-user-select: none;
-}
-/* =========================================================
-   POSITION MARKERS
-   ========================================================= */
-.mark {
-    position: absolute;
-    top: 95px;
-    font-size: 14px;
-    line-height: 1.1;
-    font-weight: bold;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: none;
-}
-/* -100 m */
-.minus100 {
-    left: 2%;
-    transform: translateX(0);
-}
-/* Origin */
-.origin {
-    left: 50%;
-    transform: translateX(-50%);
-}
-/* 50 m */
-.plus50 {
-    left: 75%;
-    transform: translateX(-50%);
-}
-/* 100 m */
-.plus100 {
-    left: 98%;
-    transform: translateX(-100%);
-}
-/* =========================================================
-   MOBILE PHONE
-   0 – 480 px
-   ========================================================= */
-@media (max-width: 480px) {
-    body {
-        padding: 7px;
-    }
-    /* -----------------------------------------
-       Headings
-       ----------------------------------------- */
-    h2 {
-        font-size: 19px;
-        margin-bottom: 8px;
-    }
-    h3 {
-        font-size: 15px;
-        margin-bottom: 7px;
-    }
-    /* -----------------------------------------
-       Panels
-       ----------------------------------------- */
-    .graphPanel,
-    .carPanel {
-        margin: 8px auto;
-        padding: 7px;
-        border-radius: 8px;
-    }
-    /* -----------------------------------------
-       Graph
-       ----------------------------------------- */
-    canvas {
-        height: 210px;
-        width: 100%;
-    }
-    /* -----------------------------------------
-       Buttons
-       ----------------------------------------- */
-    .controls {
-        gap: 6px;
-        margin-bottom: 3px;
-    }
-    button {
-        min-width: 75px;
-        min-height: 38px;
-        padding: 7px 12px;
-        font-size: 14px;
-    }
-    /* -----------------------------------------
-       Road
-       ----------------------------------------- */
-    .road {
-        height: 105px;
-        border-radius: 8px;
-    }
-    /* Road centre line */
-    .road::after {
-        top: 53px;
-        height: 3px;
-    }
-    /* -----------------------------------------
-       Car
-       ----------------------------------------- */
-    #carContainer {
-        top: 27px;
-    }
-    #carSVG {
-        width: 52px;
-    }
-    /* -----------------------------------------
-       Position labels
-       ----------------------------------------- */
-    .mark {
-        top: 68px;
-        font-size: 10px;
-    }
-    .minus100 {
-        left: 2%;
-    }
-    .origin {
-        left: 50%;
-    }
-    .plus50 {
-        left: 75%;
-    }
-    .plus100 {
-        left: 98%;
-    }
-}
-/* =========================================================
-   VERY SMALL PHONES
-   0 – 360 px
-   ========================================================= */
-@media (max-width: 360px) {
-    body {
-        padding: 5px;
-    }
-    h2 {
-        font-size: 18px;
-    }
-    h3 {
-        font-size: 14px;
-    }
-    /* -----------------------------------------
-       Panels
-       ----------------------------------------- */
-    .graphPanel,
-    .carPanel {
-        padding: 6px;
-        margin: 7px auto;
-    }
-    /* -----------------------------------------
-       Graph
-       ----------------------------------------- */
-    canvas {
-        height: 185px;
-    }
-    /* -----------------------------------------
-       Buttons
-       ----------------------------------------- */
-    button {
-        min-width: 70px;
-        min-height: 36px;
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-    /* -----------------------------------------
-       Road
-       ----------------------------------------- */
-    .road {
-        height: 95px;
-    }
-    .road::after {
-        top: 48px;
-        height: 3px;
-    }
-    /* -----------------------------------------
-       Car
-       ----------------------------------------- */
-    #carContainer {
-        top: 24px;
-    }
-    #carSVG {
-        width: 46px;
-    }
-    /* -----------------------------------------
-       Position labels
-       ----------------------------------------- */
-    .mark {
-        top: 62px;
-        font-size: 9px;
-    }
-}
-/* =========================================================
-   TABLET / iPAD
-   481 – 1023 px
-   ========================================================= */
-@media (min-width: 481px) and (max-width: 1023px) {
-    body {
-        padding: 12px;
-    }
-    h2 {
-        font-size: 23px;
-    }
-    h3 {
-        font-size: 18px;
-    }
-    /* -----------------------------------------
-       Panels
-       ----------------------------------------- */
-    .graphPanel,
-    .carPanel {
-        margin: 14px auto;
-        padding: 10px;
-    }
-    /* -----------------------------------------
-       Graph
-       ----------------------------------------- */
-    canvas {
-        height: 330px;
-    }
-    /* -----------------------------------------
-       Road
-       ----------------------------------------- */
-    .road {
-        height: 150px;
-    }
-    /* -----------------------------------------
-       Car
-       ----------------------------------------- */
-    #carContainer {
-        top: 40px;
-    }
-    #carSVG {
-        width: 80px;
-    }
-    /* -----------------------------------------
-       Position labels
-       ----------------------------------------- */
-    .mark {
-        top: 95px;
-        font-size: 14px;
-    }
-}
-/* =========================================================
-   LARGE TABLET / LAPTOP / DESKTOP
-   1024 px AND ABOVE
-   ========================================================= */
-@media (min-width: 1024px) {
-    body {
-        padding: 20px;
-    }
-    h2 {
-        font-size: 26px;
-        margin-bottom: 15px;
-    }
-    h3 {
-        font-size: 19px;
-        margin-bottom: 12px;
-    }
-    /* -----------------------------------------
-       Panels
-       ----------------------------------------- */
-    .graphPanel,
-    .carPanel {
-        margin: 20px auto;
-        padding: 12px;
-    }
-    /* -----------------------------------------
-       Graph
-       ----------------------------------------- */
-    canvas {
-        height: 350px;
-    }
-    /* -----------------------------------------
-       Road
-       ----------------------------------------- */
-    .road {
-        height: 150px;
-    }
-    /* -----------------------------------------
-       Car
-       ----------------------------------------- */
-    #carContainer {
-        top: 40px;
-    }
-    #carSVG {
-        width: 80px;
-    }
-    /* -----------------------------------------
-       Position labels
-       ----------------------------------------- */
-    .mark {
-        top: 95px;
-        font-size: 14px;
-    }
-}
-/* =========================================================
-   LANDSCAPE PHONE
-   ========================================================= */
-@media (max-width: 900px) and (orientation: landscape) {
-    body {
-        padding: 7px;
-    }
-    h2 {
-        font-size: 19px;
-        margin-bottom: 7px;
-    }
-    h3 {
-        font-size: 15px;
-        margin-bottom: 6px;
-    }
-    /* -----------------------------------------
-       Panels
-       ----------------------------------------- */
-    .graphPanel,
-    .carPanel {
-        margin: 8px auto;
-        padding: 7px;
-    }
-    /* -----------------------------------------
-       Graph
-       ----------------------------------------- */
-    canvas {
-        height: 190px;
-    }
-    /* -----------------------------------------
-       Road
-       ----------------------------------------- */
-    .road {
-        height: 105px;
-    }
-    .road::after {
-        top: 53px;
-    }
-    /* -----------------------------------------
-       Car
-       ----------------------------------------- */
-    #carContainer {
-        top: 27px;
-    }
-    #carSVG {
-        width: 52px;
-    }
-    /* -----------------------------------------
-       Labels
-       ----------------------------------------- */
-    .mark {
-        top: 68px;
-        font-size: 10px;
-    }
-}
-
-This CSS is now the matching final version for the responsive index.html and script.js I provided above.
-
-The important responsive behavior is:
-
-📱 Phone: small graphs + small car + compact spacing
-📱 Very small phone: even smaller graph/car
-📱 iPad/tablet: large graph + 80 px car
-💻 Laptop/desktop: 350 px graph + 80 px car
-
-The JavaScript also dynamically adjusts the graph’s axes, labels, tangent line, and red moving point to match these different screen sizes.
+:root { color-scheme: light; --ink:#203344; --muted:#526475; --border:#d9e3e9; --position:#2454b8; --velocity:#087b65; --acceleration:#8540a3; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:var(--ink); background:#f1f5f7; }
+* { box-sizing:border-box; }
+body { margin:0 auto; max-width:1560px; padding:16px 24px; font-size:14px; line-height:1.5; }
+h1,h2,p { margin:0; }
+h1 { font-size:clamp(25px,3.1vw,40px); line-height:1.2; font-weight:700; letter-spacing:-1px; margin:7px 0 9px; }
+h2 { font-size:17px; }
+header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:7px 0 22px; }
+header p:not(.eyebrow) { color:var(--muted); }
+.eyebrow { font-size:11px; font-weight:750; letter-spacing:1.5px; color:#36596b; }
+.eyebrow span { margin-left:12px; color:var(--muted); }
+.arrow { color:var(--velocity); font-weight:400; }
+a { color:#2454b8; }
+.concept-link { white-space:nowrap; text-underline-offset:4px; font-size:13px; }
+.toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+button,select,input,textarea { font:inherit; color:inherit; }
+button,select,input:not([type=range]):not([type=checkbox]),textarea { border:1px solid #a8bbc7; border-radius:7px; background:#fff; min-height:44px; padding:9px 12px; }
+button { cursor:pointer; font-weight:650; touch-action:manipulation; }
+button:hover { background:#eaf0f4; }
+button.primary { background:#163c4b; color:white; border-color:#163c4b; }
+.speed-label { display:flex; align-items:center; gap:7px; margin-left:10px; }
+.speed-label select { min-width:75px; }
+#playbackStatus { color:var(--muted); font-size:12px; margin-left:auto; }
+.timeline { display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--border); padding:8px 14px; margin-top:12px; border-radius:8px; }
+.timeline label { display:flex; gap:12px; white-space:nowrap; font-weight:600; }
+.timeline > span { white-space:nowrap; }
+.timeline output { color:#2454b8; min-width:59px; font-variant-numeric:tabular-nums; }
+input[type=range] { min-width:0; width:100%; height:30px; accent-color:#163c4b; margin:0; }
+input[type=checkbox] { width:18px; height:18px; vertical-align:middle; accent-color:#163c4b; flex-shrink:0; }
+.interaction-help { color:var(--muted); font-size:12px; margin:7px 0 14px; }
+.dashboard { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(260px,.9fr) minmax(0,1.15fr); gap:14px; align-items:start; }
+.card { min-width:0; background:white; border:1px solid var(--border); border-radius:12px; padding:14px; }
+.panel-heading { display:flex; gap:9px; align-items:center; margin-bottom:12px; }
+.step { color:#5b7283; font-size:11px; border:1px solid var(--border); border-radius:5px; padding:2px 5px; font-variant-numeric:tabular-nums; }
+canvas { display:block; width:100%; height:290px; background:#fff; touch-action:pan-y; user-select:none; }
+.graph-key { display:flex; flex-wrap:wrap; gap:6px 15px; font-size:11px; color:var(--muted); margin:9px 0; }
+.curve-key::before,.tangent-key::before { content:""; display:inline-block; width:16px; border-top:3px solid; margin-right:5px; vertical-align:middle; }
+.position { color:var(--position); }.velocity { color:var(--velocity); }.acceleration { color:var(--acceleration); }
+.tangent-key::before { border-top:2px dashed #bd283a; }
+.result { background:#f0f5f8; border-radius:6px; padding:10px; font-variant-numeric:tabular-nums; margin-top:8px; overflow-wrap:anywhere; }
+.road { position:relative; height:100px; background:#edf2f4; border-radius:7px; }
+.road::before { content:""; position:absolute; left:0; right:0; top:55px; border-top:2px solid #718493; }
+#carContainer { position:absolute; top:25px; width:60px; transform:translateX(-50%); pointer-events:none; }
+#carSVG { display:block; width:60px; height:30px; transform-origin:center; }
+.road .mark { position:absolute; top:70px; font-size:11px; transform:translateX(-50%); white-space:nowrap; }
+.road .mark::before { content:""; position:absolute; left:50%; top:-15px; height:8px; border-left:1px solid #718493; }
+.road-caption { margin:6px 0 9px; }
+.small { color:var(--muted); font-size:12px; }
+.live-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin:0; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:7px; overflow:hidden; }
+.live-grid div { background:white; padding:6px 9px; min-width:0; }
+.live-grid dt { font-size:11px; color:var(--muted); }.live-grid dd { margin:0; font-size:14px; font-weight:650; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.live-grid .wide { grid-column:1/-1; }.interpretation { margin-top:10px; padding-left:10px; border-left:3px solid #087b65; font-size:13px; }
+#endpointNote { margin-top:7px; }
+.learning-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:15px; align-items:start; }
+details { min-width:0; background:#fff; border:1px solid var(--border); border-radius:9px; padding:12px 14px; margin-bottom:10px; }
+summary { cursor:pointer; font-weight:650; min-height:24px; }
+details[open] summary { margin-bottom:12px; }
+details p { margin:8px 0; }
+details label,.prediction label { display:block; margin:9px 0; }
+details label:has(input[type=checkbox]) { display:flex; align-items:center; gap:7px; min-height:36px; }
+details input:not([type=checkbox]), details select,textarea { display:block; width:100%; margin-top:4px; }
+.input-row { display:flex; gap:12px; }.input-row label { flex:1; min-width:0; }
+.actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.activity-graph { display:block; width:100%; max-height:240px; }
+.question { border-top:1px solid var(--border); margin-top:14px; padding-top:8px; }
+.question input { max-width:230px; }
+.prediction { min-height:290px; background:#f0f5f8; border:1px dashed #9bafbd; border-radius:8px; padding:17px; margin-bottom:12px; }
+#predictBtn { margin-top:12px; width:100%; font-size:13px; }
+.concept-list { margin:0; }.concept-list dt { font-weight:650; margin-top:10px; }.concept-list dd { margin:0; color:var(--muted); }
+footer { padding:15px 0 6px; color:var(--muted); font-size:12px; }
+:focus-visible { outline:3px solid #bc4c0b; outline-offset:3px; }
+.skip-link { position:absolute; top:-80px; background:white; padding:10px; z-index:10; }.skip-link:focus { top:8px; }
+[hidden] { display:none !important; }
+@media(max-width:999px) { body { padding:12px; }.dashboard { grid-template-columns:1fr; }.carPanel { grid-row:2; }canvas { height:330px; }.live-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }.live-grid .wide { grid-column:span 2; }header { align-items:flex-start; }.concept-link { white-space:normal; } }
+@media(max-width:599px) { body { padding:8px; font-size:13px; }header { padding:4px 2px 13px; display:block; }header .concept-link { display:inline-block; margin-top:7px; }.eyebrow { font-size:9px; letter-spacing:1px; }.eyebrow span { margin-left:8px; }h1 { font-size:27px; }h2 { font-size:15px; }.dashboard { gap:9px; }.card { padding:10px; }.panel-heading { margin-bottom:7px; }canvas { height:230px; }.learning-grid { grid-template-columns:1fr; gap:0; margin-top:10px; }.live-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.live-grid .wide { grid-column:1/-1; }.speed-label { margin-left:0; font-size:12px; }button { padding:8px 10px; }.toolbar { gap:6px; }#playbackStatus { margin-left:0; }.timeline { gap:7px; padding:6px 9px; }.timeline label { gap:6px; }.timeline>span { font-size:11px; white-space:nowrap; }.interaction-help { font-size:11px; margin-bottom:9px; }.graph-key { font-size:11px; }.prediction { min-height:230px; }details { padding:11px; } }
+@media(min-width:1000px) and (max-width:1199px) { body { padding:14px; }.dashboard { gap:10px; grid-template-columns:minmax(0,1fr) minmax(250px,.85fr) minmax(0,1fr); }.card { padding:10px; }canvas { height:270px; }h2 { font-size:15px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important; animation:none!important; scroll-behavior:auto!important; } }

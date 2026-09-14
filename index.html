@@ -1,74 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-    <title>Position-Time Motion Simulation</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h2>Position-Time Motion Simulation</h2>
-    <!-- =====================================================
-         CONTROL BUTTONS
-         ===================================================== -->
-    <div class="controls">
-        <button id="playBtn">
-            PLAY
-        </button>
-        <button id="stopBtn">
-            STOP
-        </button>
-        <button id="resetBtn">
-            RESET
-        </button>
-    </div>
-    <!-- =====================================================
-         MAIN SIMULATION CONTAINER
-         ===================================================== -->
-    <div class="container">
-        <!-- =================================================
-             POSITION-TIME GRAPH
-             ================================================= -->
-        <div class="graphPanel">
-            <h3>
-                Position-Time Graph
-            </h3>
-            <canvas
-                id="positionCanvas"
-                aria-label="Position-Time Graph">
-            </canvas>
-        </div>
-        <!-- =================================================
-             MOVING CAR SIMULATION
-             ================================================= -->
-        <div class="carPanel">
-            <h3>
-                Moving Car Simulation
-            </h3>
-            <div class="road">
-                <!-- -----------------------------------------
-                     POSITION MARKERS
-                     ----------------------------------------- -->
-                <div class="mark minus100">
-                    -100m
-                </div>
-                <div class="mark origin">
-                    Origin
-                </div>
-                <div class="mark plus50">
-                    50m
-                </div>
-                <div class="mark plus100">
-                    100m
-                </div>
-                <!-- -----------------------------------------
-                     MOVING CAR
-                     ----------------------------------------- -->
-                <div id="carContainer">
-                    <svg
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#163c4b"><title>Position → Velocity | Linear Motion Graph Lab</title>
+<link rel="icon" href="data:,"><link rel="stylesheet" href="style.css"></head>
+<body data-simulation="1"><a class="skip-link" href="#dashboard">Skip to simulation</a>
+<header><div><p class="eyebrow">LINEAR MOTION GRAPH LAB <span>EXPERIMENT 01</span></p>
+<h1>Position <span class="arrow">→</span> Velocity</h1>
+<p>The slope of position gives velocity. Follow one motion through two graphs.</p></div>
+<a class="concept-link" href="#concepts">Concepts & graph rules ↓</a></header>
+<main><div class="toolbar" aria-label="Playback controls">
+<button id="playBtn" class="primary">▶ Play</button><button id="stopBtn">■ Stop</button><button id="resetBtn">↺ Reset</button>
+<label class="speed-label">Playback<select id="playbackSpeed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+<span id="playbackStatus" role="status">Paused</span></div>
+<div class="timeline"><label for="timeScrubber">Time <output id="timeReadout">0.00 s</output></label><input id="timeScrubber" type="range" min="0" max="30" step="0.01" value="0" aria-label="Simulation time in seconds"><span>30 s</span></div>
+<p class="interaction-help" id="keyboardHelp">Drag either graph to scrub and pause. Keyboard: ← → 0.1 s · Shift + arrow 1 s · Home / End · Space play/pause · R reset.</p>
+<div class="dashboard" id="dashboard">
+<section class="card graph-card"><div class="panel-heading"><span class="step">01</span><h2>Position–Time</h2></div>
+<canvas id="positionCanvas" tabindex="0" role="img" aria-label="Interactive position-time graph" aria-describedby="keyboardHelp primaryReadout">Use the time slider to explore the graph. Live values follow below.</canvas>
+<p class="graph-key"><span class="curve-key position">position</span><span class="tangent-key">instantaneous tangent</span></p>
+<p id="primaryReadout" class="result"></p></section>
+<section class="card carPanel"><div class="panel-heading"><span class="step">02</span><h2>Motion & live state</h2></div>
+<div class="road" role="img" aria-label="Car position along a road in metres"><div id="roadMarks"></div><div id="carContainer"><svg
                         id="carSVG"
                         width="80"
                         height="40"
@@ -144,28 +95,27 @@
                             r="5"
                             fill="yellow"
                         />
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <!-- =================================================
-             VELOCITY-TIME GRAPH
-             ================================================= -->
-        <div class="graphPanel">
-            <h3>
-                Velocity-Time Graph
-            </h3>
-            <canvas
-                id="velocityCanvas"
-                aria-label="Velocity-Time Graph">
-            </canvas>
-        </div>
-    </div>
-    <!-- =====================================================
-         JAVASCRIPT
-         ===================================================== -->
-    <script src="script.js"></script>
-</body>
-</html>
-
-This version is ready to work with the responsive CSS + responsive JavaScript we just prepared.
+                    </svg></div></div>
+<p class="small road-caption">Position coordinate (m) · positive direction →</p>
+<dl class="live-grid" id="liveState"></dl><p id="segmentExplanation" class="interpretation"></p>
+<p id="endpointNote" class="small"></p></section>
+<section class="card graph-card"><div class="panel-heading"><span class="step">03</span><h2>Velocity–Time</h2></div>
+<div id="derivedGraph"><canvas id="velocityCanvas" tabindex="0" role="img" aria-label="Interactive velocity-time graph" aria-describedby="keyboardHelp derivedReadout">Use the time slider; corresponding live values appear alongside.</canvas>
+<p class="graph-key"><span class="curve-key velocity">velocity</span><span>○ undefined at a corner</span></p><p id="derivedReadout" class="result"></p></div>
+<div id="predictionPrompt" class="prediction" hidden><p>Predict the velocity graph from the slope of the position graph. Where is it positive, zero or negative? Where does it change abruptly?</p><label>Your prediction<textarea id="predictionAnswer" rows="3" placeholder="Describe the slopes…"></textarea></label></div>
+<button id="predictBtn" aria-expanded="true" aria-controls="derivedGraph">Predict → hide velocity graph</button></section></div>
+<div class="learning-grid"><section class="tools-column"><details id="averagePanel"><summary>Average velocity · secant tool</summary>
+      <p>A secant joins two positions to measure average velocity. The red dashed tangent gives instantaneous velocity.</p>
+      <label><input type="checkbox" id="averageMode"> Show secant on position graph</label>
+      <div class="input-row"><label>t₁ (s)<input id="t1" type="number" min="0" max="30" step="0.1" value="0"></label><label>t₂ (s)<input id="t2" type="number" min="0" max="30" step="0.1" value="10"></label></div>
+      <p id="averageResult" class="result" role="status"></p></details>
+<details id="derivedInfo"><summary>Derived acceleration · a = dv/dt = d²s/dt²</summary>
+<p id="optionalReadout"></p><p>Acceleration is undefined at 5, 10, 15 and 25 s. At 15 and 25 s velocity jumps: an idealisation requiring an impulse, not a finite acceleration.</p></details>
+<details id="concepts"><summary>Concepts & graph rules</summary><div id="conceptContent"></div></details></section>
+<section class="activities-column"><details id="workedExample"><summary>Worked example · polynomial motion</summary>
+      <p>A separate motion: s(t) = 2.4t² − 0.12t³, for 0 ≤ t ≤ 10 s. Try each answer before checking the steps.</p>
+      <div id="exampleQuestions"></div></details><details id="challenges"><summary>Challenge mode · 8 questions</summary>
+<label>Choose a challenge<select id="challengeSelect"></select></label><p id="challengeQuestion"></p>
+<label>Your answer<input id="challengeAnswer" autocomplete="off"></label><div class="actions"><button id="checkAnswer">Check answer</button><button id="hintBtn">Hint</button><button id="solutionBtn">Show solution</button></div><p id="challengeFeedback" role="status"></p></details></section></div>
+</main><footer>One motion, connected graphs. Position may decrease; accumulated distance never does.</footer>
+<script type="module" src="script.js"></script></body></html>
